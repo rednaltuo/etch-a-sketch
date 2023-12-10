@@ -11,6 +11,7 @@
     margin: 0;
     border: 0;
     transition: scale 100ms;
+    box-sizing: border-box;
 }
 
 body {
@@ -64,7 +65,7 @@ input[type=color] {
     cursor: pointer;
 }
 
-.color-btn {
+#color-btn {
     margin-top: -35px;
 }
 
@@ -81,21 +82,31 @@ button {
 }
 
 .grid {
-    min-height: 50%;
-    min-width: 50%;
     background-color: white;
-    box-shadow: 2px 2px 8px gray;
+    box-shadow: 2px 2px 8px gray; 
+    display: flex;
+    flex-wrap: wrap;
+    /* Prevent the grid from being draggable */
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.grid:hover {
+    cursor: url('resources/paint-brush.png') 0 32, pointer;
+}
+
+.grid-visible {
+    border: 1px var(--primary-light) solid;
 }
 
 label {
     margin: 0 auto -15px;
 }
 
-footer {
-    margin-bottom: 10px;
-}
-
-#slider {
+#gridSizeSlider {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
@@ -105,7 +116,7 @@ footer {
     background: var(--secondary-light);
 }
 
-#slider::-webkit-slider-thumb {
+#gridSizeSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 25px;
@@ -115,7 +126,7 @@ footer {
     cursor: pointer;
 }
 
-#slider::-moz-range-thumb {
+#gridSizeSlider::-moz-range-thumb {
     -moz-appearance: none;
     appearance: none;
     width: 25px;
@@ -127,6 +138,15 @@ footer {
 }
 
 .selected {
+    color: var(--secondary-light);
+    background-color: var(--primary-dark);
+}
+
+#clear-btn {
+    transition: color 70ms ease;
+    transition: background-color 70ms ease;
+}
+.clear {
     color: var(--secondary-light);
     background-color: var(--primary-dark);
 }
@@ -150,6 +170,6 @@ button:hover,
     transition: rotate 300ms;
 }
 
-.grid:hover {
-    cursor: url('resources/paint-brush.png') 0 32, pointer;
+footer {
+    margin-bottom: 10px;
 }

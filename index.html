@@ -12,16 +12,16 @@
             <div class="color-options">
                 <div class="color-picker"></div>
                 <input type="color">
-                <button class="color-btn selected">Color mode</button>
-                <button class="rainbow-btn">Rainbow mode</button>
-                <button class="eraser-btn">Eraser</button>
+                <button id="color-btn">Color mode</button>
+                <button id="rainbow-btn">Rainbow mode</button>
+                <button id="eraser-btn">Eraser</button>
             </div>
             <div class="grid"></div>
             <div class="grid-options">
-                <label for="slider">16 x 16</label>
-                <input type="range" min="1" max="100" value="16" id="slider">
-                <button class="show-grid-btn">Show grid</button>
-                <button class="clear-btn">Clear</button>
+                <label for="gridSizeSlider"></label>
+                <input id="gridSizeSlider" type="range" min="1" max="64" value="16">
+                <button id="show-grid-btn">Show grid</button>
+                <button id="clear-btn">Clear</button>
             </div>
         </main>
         <footer>Copyright © 2023 rednaltuo <a href="https://github.com/rednaltuo/etch-a-sketch"><img id="github" src="resources/github-mark.png" alt="Github logo" height="28px" width="28px"></a></footer>
