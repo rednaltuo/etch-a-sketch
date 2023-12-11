@@ -45,17 +45,19 @@ function generateGrid() {
 }
 
 function generateCells(grid) {
-    const cellDimensionPx = `${(grid.style.height.slice(0, -2))/gbl_gridSize}px`;
-    
-    for (let i = 0; i < gbl_gridSize*gbl_gridSize; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        if (gbl_gridVisible)
-            cell.classList.add('grid-visible');
-        cell.style.height = cellDimensionPx;
-        cell.style.width = cellDimensionPx;
-        grid.appendChild(cell);
+    for (let i = 0; i < gbl_gridSize; i++) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        grid.appendChild(row);
+        for (let j = 0; j < gbl_gridSize; j++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            if (gbl_gridVisible)
+                cell.classList.add('grid-visible');
+            row.appendChild(cell);
+        }
     }
+
 
     gbl_cells = document.querySelectorAll('.cell');
 }

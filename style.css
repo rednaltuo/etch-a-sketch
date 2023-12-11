@@ -85,13 +85,22 @@ button {
     background-color: white;
     box-shadow: 2px 2px 8px gray; 
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     /* Prevent the grid from being draggable */
     -moz-user-select: none;
     -khtml-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.row {
+    display: flex;
+    flex: 1;
+}
+
+.cell {
+    flex: 1;
 }
 
 .grid:hover {
