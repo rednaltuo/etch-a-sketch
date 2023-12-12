@@ -2,7 +2,8 @@
 let gbl_gridSize;               
 let gbl_currentColor;         
 let gbl_gridVisible;        
-let gbl_currentColorOption;   
+let gbl_currentColorOption;
+let gbl_shadingValue;
 let gbl_cells;
 
 
@@ -25,6 +26,7 @@ function setDefaults() {
     gbl_gridSize = 16;
     gbl_currentColor = '#333';
     gbl_gridVisible = false;
+    gbl_shadingValue = 255 / 15;
 
     const defaultColorOption = document.querySelector('#color-btn');
     defaultColorOption.classList.add('selected');
@@ -122,7 +124,7 @@ function addClearBtnEventListeners() {
         
         // Clear grid
         gbl_cells.forEach((cell) => {
-            cell.style.backgroundColor = 'transparent';
+            cell.style.backgroundColor = '';
         });
     });
 }
@@ -161,17 +163,32 @@ function setGridSizeLabel() {
 
 function paint(cell) {
     const currentColorOptionId = '#'+gbl_currentColorOption.id;
+    let rgb;
 
     switch(currentColorOptionId) {
     case '#color-btn':
         cell.style.backgroundColor = gbl_currentColor;
         break;
-    case '#eraser-btn':
-        cell.style.backgroundColor = 'transparent';
-        break;
     case '#rainbow-btn':
         cell.style.backgroundColor = getRainbowColor();
+        break;
+    case '#shading-btn':
+        rgb = getRgbArray(cell.style.backgroundColor);
+        cell.style.backgroundColor = `rgb(${rgb[0]-gbl_shadingValue}, ${rgb[1]-gbl_shadingValue}, ${rgb[2]-gbl_shadingValue})`;
+        break;
+    case '#lighten-btn':
+        rgb = getRgbArray(cell.style.backgroundColor);
+        cell.style.backgroundColor = `rgb(${rgb[0]+gbl_shadingValue}, ${rgb[1]+gbl_shadingValue}, ${rgb[2]+gbl_shadingValue})`;
+        break;
+    case '#eraser-btn':
+        cell.style.backgroundColor = '';
     }
+}
+
+function getRgbArray(rgb) {
+    if (!rgb)
+	    rgb = '255,255,255';
+    return rgb.replace(/[^\d,]/g, '').split(',').map((v) => Number(v));
 }
 
 // Generate a random color that's not too dark nor too bright
