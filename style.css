@@ -59,7 +59,6 @@ input[type=color] {
     height: 100px;
     width: 100px;
     border-radius: 100%;
-    background-color: var(--primary-dark);
     margin: 0 auto;
     box-shadow: 2px 2px 5px var(--primary-dark);
     cursor: pointer;
@@ -103,11 +102,20 @@ button {
     flex: 1;
 }
 
-.grid:hover {
+.painting:hover {
     cursor: url('resources/paint-brush.png') 0 32, pointer;
 }
+.rainbow-painting:hover {
+    cursor: url('resources/rainbow-brush.png') 0 32, pointer;
+}
+.erasing:hover {
+    cursor: url('resources/eraser.png') 0 32, pointer;
+}
+.grabbing-color:hover {
+    cursor: url('resources/color-picker.png') 0 32, pointer;
+}
 
-.grid-visible {
+.visible .cell {
     border: 1px var(--primary-light) solid;
 }
 
@@ -151,13 +159,13 @@ label {
     background-color: var(--primary-dark);
 }
 
-#clear-btn {
-    transition: color 70ms ease;
-    transition: background-color 70ms ease;
-}
 .clear {
     color: var(--secondary-light);
     background-color: var(--primary-dark);
+}
+.clear-complete {
+    transition: color 70ms ease;
+    transition: background-color 70ms ease;
 }
 
 button:hover,

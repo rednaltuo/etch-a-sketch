@@ -1,11 +1,20 @@
+const MODE = Object.freeze({
+    COLOR: 'color-btn',
+    RAINBOW: 'rainbow-btn',
+    SHADING: 'shading-btn',
+    LIGHTEN: 'lighten-btn',
+    ERASER: 'eraser-btn'
+});
+
 // Global variables
 let gbl_gridSize;               
 let gbl_currentColor;         
-let gbl_gridVisible;        
-let gbl_currentColorOption;
+let gbl_gridVisible;
 let gbl_shadingValue;
-let gbl_cells;
+let gbl_grabbingColor;  
+let gbl_currentColorOption;
 
+let grid;
 
 initialize();
 
@@ -13,40 +22,40 @@ initialize();
 function initialize() {
     setDefaults();
 
+    grid = document.querySelector('.grid');
     generateGrid();
 
-    addGridSizeSliderEventListeners();
+    addGridSizeEventListeners();
     addColorOptionsEventListeners();
-    addShowGridBtnEventListeners();
-    addClearBtnEventListeners();
-    setupColorPicker();
+    addShowGridEventListeners();
+    addGrabColorEventListeners();
+    addClearEventListeners();
+    addColorPickerEventListeners();
 }
 
 function setDefaults() {
     gbl_gridSize = 16;
-    gbl_currentColor = '#333';
+    gbl_currentColor = '#333333';
     gbl_gridVisible = false;
     gbl_shadingValue = 255 / 15;
+    gbl_grabbingColor = false;
 
-    const defaultColorOption = document.querySelector('#color-btn');
-    defaultColorOption.classList.add('selected');
-    gbl_currentColorOption = defaultColorOption;
+    gbl_currentColorOption = document.querySelector('#color-btn');
+    gbl_currentColorOption.classList.add('selected');
     
     setGridSizeLabel();
 }
 
 function generateGrid() {
-    const grid = document.querySelector('.grid');
-
     grid.style.height = `${window.innerHeight * 0.8}px`;
     grid.style.width = grid.style.height;
 
     grid.replaceChildren();
-    generateCells(grid);
-    addCellEventListeners();
+    generateCells();
+    addGridEventListeners();
 }
 
-function generateCells(grid) {
+function generateCells() {
     for (let i = 0; i < gbl_gridSize; i++) {
         const row = document.createElement('div');
         row.className = 'row';
@@ -54,20 +63,26 @@ function generateCells(grid) {
         for (let j = 0; j < gbl_gridSize; j++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
-            if (gbl_gridVisible)
-                cell.classList.add('grid-visible');
             row.appendChild(cell);
         }
     }
-
-
-    gbl_cells = document.querySelectorAll('.cell');
 }
 
 
 /* EVENT LISTENERS */
 
-function addGridSizeSliderEventListeners() {
+function addGridEventListeners() {
+    ['mouseover', 'mousedown'].forEach((mouseAction) => {
+        grid.addEventListener(mouseAction, (e) => {
+            if (gbl_grabbingColor)
+                return;
+            if (e.buttons == 1 || e.buttons == 3)
+                paint(e.target);
+        }); 
+    });
+}
+
+function addGridSizeEventListeners() {
     const gridSizeSlider = document.querySelector('#gridSizeSlider');
 
     gridSizeSlider.addEventListener('input', () => {
@@ -80,58 +95,100 @@ function addGridSizeSliderEventListeners() {
 }
 
 function addColorOptionsEventListeners() {
-    const colorOptions = document.querySelectorAll('.color-options button');
+    const colorOptions = document.querySelector('.color-options');
 
-    colorOptions.forEach((colorOption) => {
-        colorOption.addEventListener('click', () => {
-            gbl_currentColorOption.classList.remove('selected');
-            gbl_currentColorOption = colorOption;
-            gbl_currentColorOption.classList.add('selected');
-        });
+    colorOptions.addEventListener('click', (e) => {
+        if (gbl_grabbingColor || e.target.nodeName?.toLowerCase() != 'button')
+            return;
+
+        gbl_currentColorOption.classList.remove('selected');
+        gbl_currentColorOption = e.target;
+        gbl_currentColorOption.classList.add('selected');
+
+        setGridCursor();
     });
 }
 
-function addShowGridBtnEventListeners() {
+function addShowGridEventListeners() {
     const showGridBtn = document.querySelector('#show-grid-btn');
 
     showGridBtn.addEventListener('click', () => {
         if (gbl_gridVisible) {
             gbl_gridVisible = false;
             showGridBtn.classList.remove('selected');
-            gbl_cells.forEach((cell) => {
-                cell.classList.remove('grid-visible');
-            });
+            grid.classList.remove('visible');
         }
         else {
             gbl_gridVisible = true;
             showGridBtn.classList.add('selected');
-            gbl_cells.forEach((cell) => {
-                cell.classList.add('grid-visible');
-            });
+            grid.classList.add('visible');
         }
     });
 }
 
-function addClearBtnEventListeners() {
+function addGrabColorEventListeners() {
+    const grabColorBtn = document.querySelector('#grab-btn');
+
+    grabColorBtn.addEventListener('click', () => {
+        if (gbl_grabbingColor) {
+            gbl_grabbingColor = false;
+            setGridCursor();
+            grabColorBtn.classList.remove('selected');
+            gbl_currentColorOption.classList.add('selected');
+        }
+        else {
+            gbl_grabbingColor = true;
+            setGridCursor();
+            grabColorBtn.classList.add('selected');
+            gbl_currentColorOption.classList.remove('selected');
+        }
+    });
+
+    grid.addEventListener('click', (e) => {
+        if (gbl_grabbingColor) {
+            gbl_grabbingColor = false;
+            grabColorBtn.classList.remove('selected');
+            grid.classList.remove('grabbing-color');
+
+            const colorInput = document.querySelector('input[type=color]');
+            const colorPickerDiv = document.querySelector('.color-picker');
+            let colorPicked = e.target.style.backgroundColor ;
+            colorPicked = colorPicked.match(/[0-9]+/g)?.reduce((a, b) => a+(b|256).toString(16).slice(1), '#') ?? '#FFFFFF';
+            colorInput.value = colorPicked;
+            colorPickerDiv.style.backgroundColor = colorPicked;
+
+            gbl_currentColor = colorPicked;
+            gbl_currentColorOption = document.querySelector('#'+MODE.COLOR);
+            gbl_currentColorOption.classList.add('selected');
+            setGridCursor()
+        }
+    });
+}
+
+function addClearEventListeners() {
     const clearBtn = document.querySelector('#clear-btn');
 
     clearBtn.addEventListener('click', () => {
         // Button clicked visual effect
         clearBtn.className = 'clear';
         setTimeout(() => {
-            clearBtn.className = '';
-        }, 70);
+            clearBtn.className = 'clear-complete';
+        }, 100);
         
         // Clear grid
-        gbl_cells.forEach((cell) => {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell) => {
             cell.style.backgroundColor = '';
         });
     });
 }
 
-function setupColorPicker() {
+function addColorPickerEventListeners() {
     const colorInput = document.querySelector('input[type=color]');
     const colorPickerDiv = document.querySelector('.color-picker');
+
+    colorPickerDiv.style.backgroundColor = gbl_currentColor;
+    colorInput.value = gbl_currentColor;
 
     colorInput.addEventListener('input', () => {
         colorPickerDiv.style.backgroundColor = colorInput.value;
@@ -139,17 +196,6 @@ function setupColorPicker() {
     });
     colorPickerDiv.addEventListener('click', () => {
         colorInput.click();
-    });
-}
-
-function addCellEventListeners() {
-    ['mouseover', 'mousedown'].forEach((mouseAction) => {
-        gbl_cells.forEach((cell) => {
-            cell.addEventListener(mouseAction, (e) => {
-                if (e.buttons == 1 || e.buttons == 3)
-                    paint(cell);
-            }); 
-        });
     });
 }
 
@@ -161,34 +207,52 @@ function setGridSizeLabel() {
     gridSizeLabel.textContent = `${gbl_gridSize} x ${gbl_gridSize}`;
 }
 
+function setGridCursor() {
+    if (gbl_grabbingColor) {
+        grid.classList.add('grabbing-color');
+        return;
+    }
+    switch (gbl_currentColorOption.id) {
+    case MODE.RAINBOW:
+        grid.className = 'grid rainbow-painting';
+        break;
+    case MODE.ERASER:
+        grid.className = 'grid erasing';
+        break;
+    default:
+        grid.className = 'grid painting';
+    }
+    if (gbl_gridVisible)
+        grid.classList.add('visible');
+}
+
 function paint(cell) {
-    const currentColorOptionId = '#'+gbl_currentColorOption.id;
-    let rgb;
+    const currentColorOptionId = gbl_currentColorOption.id;
 
     switch(currentColorOptionId) {
-    case '#color-btn':
+    case MODE.COLOR:
         cell.style.backgroundColor = gbl_currentColor;
         break;
-    case '#rainbow-btn':
+    case MODE.RAINBOW:
         cell.style.backgroundColor = getRainbowColor();
         break;
-    case '#shading-btn':
-        rgb = getRgbArray(cell.style.backgroundColor);
-        cell.style.backgroundColor = `rgb(${rgb[0]-gbl_shadingValue}, ${rgb[1]-gbl_shadingValue}, ${rgb[2]-gbl_shadingValue})`;
+    case MODE.SHADING:
+    case MODE.LIGHTEN:
+        cell.style.backgroundColor = calculateShadedRgb(cell.style.backgroundColor, currentColorOptionId);
         break;
-    case '#lighten-btn':
-        rgb = getRgbArray(cell.style.backgroundColor);
-        cell.style.backgroundColor = `rgb(${rgb[0]+gbl_shadingValue}, ${rgb[1]+gbl_shadingValue}, ${rgb[2]+gbl_shadingValue})`;
-        break;
-    case '#eraser-btn':
+    case MODE.ERASER:
         cell.style.backgroundColor = '';
     }
 }
 
-function getRgbArray(rgb) {
+function calculateShadedRgb(rgb, mode) {
     if (!rgb)
 	    rgb = '255,255,255';
-    return rgb.replace(/[^\d,]/g, '').split(',').map((v) => Number(v));
+    rgb = rgb.replace(/[^\d,]/g, '').split(',').map((v) => Number(v));
+    if (mode == MODE.SHADING)
+        return `rgb(${rgb[0] - gbl_shadingValue}, ${rgb[1] - gbl_shadingValue}, ${rgb[2] - gbl_shadingValue})`
+    return `rgb(${rgb[0] + gbl_shadingValue}, ${rgb[1] + gbl_shadingValue}, ${rgb[2] + gbl_shadingValue})`;
+
 }
 
 // Generate a random color that's not too dark nor too bright
